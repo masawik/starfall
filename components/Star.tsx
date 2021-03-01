@@ -34,16 +34,15 @@ export interface IStar {
 }
 
 interface IStarProps extends IStar {
-  onFinish: (id: string) => void,
+  onFinish: (id: string, value: number) => void,
   isPaused: boolean
 }
 
 const Star: React.FC<IStarProps> = ({value, delay, endPos, startPos, onFinish, id, isPaused}) => {
   const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null)
-
-
+  //todo подумать над тем как сократить время таймера после снятия с паузы
   const setTimer = () => {
-    const timerId = setTimeout(() => onFinish(id), delay)
+    const timerId = setTimeout(() => onFinish(id, value), delay)
     setTimerId(timerId)
   }
 
