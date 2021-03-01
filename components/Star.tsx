@@ -1,24 +1,8 @@
 /** @jsxImportSource @emotion/react */
-import React, {useEffect, useState} from 'react'
+import React, {useEffect, useMemo, useState} from 'react'
 import styled from '@emotion/styled'
 import { jsx, css, keyframes } from '@emotion/react'
-
-const TOP_OFFSET = -200
-
-const StarEL = styled.div`
-  height: 150px;
-  width: 150px;
-  background-image: url('/assets/star.png');
-  background-size: contain;
-  background-repeat: no-repeat;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 60px;
-  font-weight: bold;
-  position: absolute;
-  top: ${TOP_OFFSET}px;
-`
+import {STAR_SIZE} from '../pages/play'
 
 export type TStarPosition = {
   x: number,
@@ -39,8 +23,21 @@ interface IStarProps extends IStar {
 }
 
 const Star: React.FC<IStarProps> = ({value, delay, endPos, startPos, onFinish, id, isPaused}) => {
+  const StarEL = useMemo(() => styled.div`
+    height: ${STAR_SIZE}px;
+    width: ${STAR_SIZE}px;
+    background-image: url('/assets/star.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 40px;
+    font-weight: bold;
+    position: absolute;
+    top: -${STAR_SIZE}px;
+`, [])
   const [timerId, setTimerId] = useState<NodeJS.Timeout | null>(null)
-  //todo подумать над тем как сократить время таймера после снятия с паузы
   const setTimer = () => {
     const timerId = setTimeout(() => onFinish(id, value), delay)
     setTimerId(timerId)
@@ -57,11 +54,11 @@ const Star: React.FC<IStarProps> = ({value, delay, endPos, startPos, onFinish, i
 
   const fallingAnimation = keyframes`
   from {
-    transform: translate(${startPos.x}px, ${startPos.y - TOP_OFFSET}px);
+    transform: translate(${startPos.x}px, ${startPos.y + STAR_SIZE}px);
   }
   
   to {
-    transform: translate(${endPos.x}px, ${endPos.y - TOP_OFFSET}px);
+    transform: translate(${endPos.x}px, ${endPos.y + STAR_SIZE}px);
   }
 `
 

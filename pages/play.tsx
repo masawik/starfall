@@ -5,9 +5,14 @@ import {random, uniqueId} from 'lodash'
 import Timer from '../components/Timer'
 import MainLayout from '../components/MainLayout'
 
-
 const STARFALL_ZONE_WIDTH = 500
-const MIN_STARS_COUNT = 5
+const STARFALL_ZONE_HEIGHT = 600
+const MIN_STARS_COUNT = 3
+const STAR_FALLING_MIN_DELAY = 2000
+const STAR_FALLING_MAX_DELAY = 6000
+const STAR_MIN_VALUE = -5
+const STAR_MAX_VALUE = 5
+export const STAR_SIZE = 150
 
 const MainContainer = styled.div`
   margin: 0 auto;
@@ -26,8 +31,7 @@ const ContentContainer = styled.div`
   width: ${STARFALL_ZONE_WIDTH}px;
 `
 const StarContainer = styled.div`
-    height: 600px;
-    border: 1px solid red;
+    height: ${STARFALL_ZONE_HEIGHT}px;
     overflow: hidden;
     position: relative;
   `
@@ -36,9 +40,6 @@ const ControlPanel = styled.div`
     background-color: rgba(255,255,255, .4);
     display: flex;
     justify-content: space-around;
-    color: #371548;
-    font-size: 30px;
-    font-weight: bold;
 `
 const Button = styled.button`
   padding: 15px 20px;
@@ -68,12 +69,22 @@ const Button = styled.button`
     margin-right: 5px;
   }
 `
+const StatBox = styled.div`
+    color: #fff;
+    font-size: 30px;
+    font-weight: bold;
+    text-align: end;
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    right: 0;
+`
 
 type TStarsState = Array<IStar>
 
 const StartButton: React.FC<{ func: () => void }> = ({func}) => (
   <Button color={'#B7D333'} onClick={func}>
-    <img src={'/assets/play.svg'} alt="старт"/>
+    старт
   </Button>
 )
 
@@ -87,20 +98,19 @@ const Play: React.FC = () => {
     if (isPlaying && stars.length < MIN_STARS_COUNT) {
       const newStarsState: TStarsState = new Array(MIN_STARS_COUNT - stars.length)
         .fill(null)
-        //todo убрать магические числа
         .map(() => {
           let value = 0
-          while (!value) value = random(-5, 5)
+          while (!value) value = random(STAR_MIN_VALUE, STAR_MAX_VALUE)
           return {
             id: uniqueId('star_'),
-            delay: random(100, 1000),
+            delay: random(STAR_FALLING_MIN_DELAY, STAR_FALLING_MAX_DELAY),
             startPos: {
-              x: random(0, 350),
-              y: random(-150, -800),
+              x: random(0, STARFALL_ZONE_WIDTH - STAR_SIZE),
+              y: random(-STAR_SIZE, -STARFALL_ZONE_HEIGHT),
             },
             endPos: {
-              x: random(0, 350),
-              y: 600,
+              x: random(0, STARFALL_ZONE_WIDTH - STAR_SIZE),
+              y: STARFALL_ZONE_HEIGHT,
             },
             value: value
           }
@@ -111,9 +121,9 @@ const Play: React.FC = () => {
 
   const onRestart = useCallback(() => {
     setStars([])
-    setScoreCounter(0)
     setIsPlaying(false)
     setIsPaused(false)
+    setScoreCounter(0)
   }, [])
 
   const deleteStar = useCallback((id: string) => {
@@ -126,7 +136,10 @@ const Play: React.FC = () => {
   }, [])
 
   const togglePause = useCallback(() => setIsPaused(prevState => !prevState), [])
-  const onPlay = useCallback(() => setIsPlaying(true), [])
+  const onPlay = useCallback(() => {
+    setScoreCounter(0)
+    setIsPlaying(true)
+  }, [])
 
   const $stars = stars.map(i => {
     if (!i) return
@@ -150,35 +163,33 @@ const Play: React.FC = () => {
       <MainContainer>
         <ContentContainer>
           <StarContainer>
-            {$stars}
-          </StarContainer>
-
-          <ControlPanel>
-            <div>
+            <StatBox>
               <div>Счет: {scoreCounter}</div>
               <Timer
                 isPaused={isPaused}
                 isPlaying={isPlaying}
               />
-            </div>
+            </StatBox>
+            {$stars}
+          </StarContainer>
 
+          <ControlPanel>
             <div>
               {!isPlaying && <StartButton func={onPlay}/>}
 
               {isPlaying && !isPaused
               &&
               <Button color={'#FEE72B'} onClick={togglePause}>
-                <img src={'/assets/pause.svg'} alt="пауза"/>
+                Пауза
               </Button>}
 
               {isPlaying && isPaused && <StartButton func={togglePause}/>}
 
               {isPlaying
-                &&
-                <Button color={'#c93636'} onClick={onRestart}>
-                  <img src={'/assets/reload.svg'} alt="рестарт"/>
-                </Button>}
-
+              &&
+              <Button color={'#c93636'} onClick={onRestart}>
+                рестарт
+              </Button>}
             </div>
           </ControlPanel>
         </ContentContainer>
